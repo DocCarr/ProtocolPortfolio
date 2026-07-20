@@ -1,0 +1,31 @@
+# Test Procedure Template
+
+Copy this file to a new name (e.g. `001-modbus-read-voltage.md`) for each new test procedure.
+
+## Pre-test checklist
+
+- [ ] Copy `config/network.example.json` -> `config/network.json` and `config/mapping.example.json`
+      -> `config/mapping.json` if not already done, and update them with the current WiFi
+      SSID/password and correct IPs for this test setup. These files are gitignored - never
+      commit real credentials.
+- [ ] Mosquitto broker running on laptop; note its IP/port.
+- [ ] Modbus server emulator running; note its IP/port and the register values under test.
+- [ ] Opta connected via USB with the Arduino IDE Serial Monitor open.
+
+## Test description
+
+(What this test verifies.)
+
+## Steps
+
+1. ...
+
+## Expected result
+
+...
+
+## Screenshots to capture
+
+- Opta Serial Monitor
+- Mosquitto terminal
+- Modbus emulator

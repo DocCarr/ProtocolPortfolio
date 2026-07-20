@@ -1,0 +1,11 @@
+{
+  "modbus": {
+    "targetIp": "192.168.1.50",
+    "targetPort": 502
+  },
+  "mqtt": {
+    "brokerIp": "192.168.1.100",
+    "brokerPort": 1883
+  },
+  "registers": []
+}

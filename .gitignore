@@ -1,0 +1,14 @@
+# Real device configuration (contains credentials and real network info - never commit)
+config/network.json
+config/mapping.json
+
+# Arduino build artifacts
+build/
+*.hex
+*.bin
+*.elf
+
+# Editor/IDE
+.vscode/
+.idea/
+*.swp
