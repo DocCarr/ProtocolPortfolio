@@ -16,11 +16,17 @@ details that don't fit the current structure.
 
 - [x] Resolve the LittleFS partitioning issue (`docs/partitioning-notes.md`) — user data lives
       in partition 4 (offset 7 MB, size 7 MB), mounted via `MBRBlockDevice`
-- [ ] WiFi access point + local web server hosting an upload form
-- [ ] Upload handling for `network.json` and `mapping.json`
-- [ ] Basic validation of uploaded JSON before writing (well-formed, required fields present)
-- [ ] Write validated files to the designated LittleFS partition
+- [ ] WiFi access point + local web server (test harness: accepts direct `curl` PUT/POST of
+      config files; no upload form - see note below)
+- [ ] Independent get/delete/push handling for `network.json` and `mapping.json`
+- [ ] Push writes the incoming file directly, then reads it back and validates it (well-formed
+      JSON, required fields present), logging pass/fail to Serial
 - [ ] Manual test: provision a device end-to-end, confirm files land correctly on flash
+
+**Note on validation order**: the write-then-validate flow above is a deliberate test-harness
+simplification (matches curl-based file transfer, not a real upload UI) - good enough to
+exercise the main sketch's config-loading logic. A production provisioning path should validate
+*before* writing, so invalid data never lands on flash even transiently.
 
 ## 3. Main sketch — top-down skeleton (`src/ModbusMqtt`)
 

@@ -4,6 +4,10 @@ Copy this file to a new name (e.g. `001-modbus-read-voltage.md`) for each new te
 
 ## Pre-test checklist
 
+- [ ] If provisioning the device this run: update the `AP_SSID`/`AP_PASSWORD` placeholders in
+      `provisioning/OptaProvisioning/OptaProvisioning.ino` before uploading it. These are the
+      provisioning access point's own credentials (separate from the WiFi credentials being
+      provisioned onto the device below) - never commit real values.
 - [ ] Copy `config/network.example.json` -> `config/network.json` and `config/mapping.example.json`
       -> `config/mapping.json` if not already done, and update them with the current WiFi
       SSID/password and correct IPs for this test setup. These files are gitignored - never
