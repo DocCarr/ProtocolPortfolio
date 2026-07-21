@@ -23,10 +23,13 @@ sections 4 and 5.
 
 - [x] `OptaConfigStorage` — header/stub skeleton: mount/read/write/delete, well-formed JSON
       check, required-field-presence check (caller supplies the field-path list)
-- [ ] `OptaConfigStorage` — bottom-up implementation
+- [x] `OptaConfigStorage` — bottom-up implementation: `BlockDevice::get_default_instance()` ->
+      `MBRBlockDevice` -> `mbed::LittleFileSystem`, POSIX file I/O, ArduinoJson-based checks —
+      confirmed against the real `QSPIFormat.ino` example, not just assumed
 - [x] `OptaWifiSupport` — header/stub skeleton: access point mode and station mode
       (including reconnection) as distinct functions
-- [ ] `OptaWifiSupport` — bottom-up implementation
+- [x] `OptaWifiSupport` — bottom-up implementation: `WiFi.config()`/`beginAP()`/`begin()`/
+      `status()`, verified against the installed Opta core's actual WiFi headers
 - [x] `OptaEthernetSupport` — header/stub skeleton: static-IP setup and reconnection
 - [ ] `OptaEthernetSupport` — bottom-up implementation
 - [x] `OptaModbusSupport` — header/stub skeleton: connect/reconnect, generic register
@@ -43,8 +46,10 @@ sections 4 and 5.
 - [x] Top-down skeleton: WiFi access point + local web server (test harness: accepts direct
       `curl` PUT/POST of config files; no upload form — see note below), delegating
       partition mount to `OptaConfigStorage` and AP setup to `OptaWifiSupport`
-- [ ] Independent get/delete/push handling for `network.json` and `mapping.json`
-- [ ] Push writes the incoming file directly, then reads it back and validates it (well-formed
+- [x] Independent get/delete/push handling for `network.json` and `mapping.json` — implemented
+      via manual HTTP parsing over `WiFiServer`/`WiFiClient` (no `WebServer.h` exists for this
+      board; confirmed absent from the installed core and every other installed library)
+- [x] Push writes the incoming file directly, then reads it back and validates it (well-formed
       JSON, required fields present), logging pass/fail to Serial
 - [ ] Manual test: provision a device end-to-end, confirm files land correctly on flash
 
