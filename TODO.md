@@ -14,8 +14,8 @@ details that don't fit the current structure.
 
 ## 2. Provisioning tool (`provisioning/OptaProvisioning`)
 
-- [ ] Resolve the LittleFS partitioning issue (`docs/partitioning-notes.md`) — a scheme that
-      keeps our config partition separate from anything the WiFi module relies on
+- [x] Resolve the LittleFS partitioning issue (`docs/partitioning-notes.md`) — user data lives
+      in partition 4 (offset 7 MB, size 7 MB), mounted via `MBRBlockDevice`
 - [ ] WiFi access point + local web server hosting an upload form
 - [ ] Upload handling for `network.json` and `mapping.json`
 - [ ] Basic validation of uploaded JSON before writing (well-formed, required fields present)
