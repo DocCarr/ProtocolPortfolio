@@ -5,7 +5,122 @@
   },
   "mqtt": {
     "brokerIp": "192.168.1.100",
-    "brokerPort": 1883
+    "brokerPort": 1883,
+    "clientId": "opta-bridge-01"
   },
-  "registers": []
+  "pollIntervalMs": 1000,
+  "registers": [
+    {
+      "name": "start_stop_command",
+      "registerType": "holding",
+      "address": 0,
+      "registerCount": 1,
+      "direction": "write",
+      "topic": "site1/command/opta-bridge-01/inv-0001/start_stop"
+    },
+    {
+      "name": "real_power_dispatch",
+      "registerType": "holding",
+      "address": 1,
+      "registerCount": 2,
+      "direction": "write",
+      "topic": "site1/command/opta-bridge-01/inv-0001/real_power"
+    },
+    {
+      "name": "reactive_power_dispatch",
+      "registerType": "holding",
+      "address": 3,
+      "registerCount": 2,
+      "direction": "write",
+      "topic": "site1/command/opta-bridge-01/inv-0001/reactive_power"
+    },
+    {
+      "name": "voltage_phase_a",
+      "registerType": "input",
+      "address": 100,
+      "registerCount": 2,
+      "direction": "read",
+      "topic": "site1/telemetry/opta-bridge-01/inv-0001/voltage_a"
+    },
+    {
+      "name": "voltage_phase_b",
+      "registerType": "input",
+      "address": 102,
+      "registerCount": 2,
+      "direction": "read",
+      "topic": "site1/telemetry/opta-bridge-01/inv-0001/voltage_b"
+    },
+    {
+      "name": "voltage_phase_c",
+      "registerType": "input",
+      "address": 104,
+      "registerCount": 2,
+      "direction": "read",
+      "topic": "site1/telemetry/opta-bridge-01/inv-0001/voltage_c"
+    },
+    {
+      "name": "current_phase_a",
+      "registerType": "input",
+      "address": 106,
+      "registerCount": 2,
+      "direction": "read",
+      "topic": "site1/telemetry/opta-bridge-01/inv-0001/current_a"
+    },
+    {
+      "name": "current_phase_b",
+      "registerType": "input",
+      "address": 108,
+      "registerCount": 2,
+      "direction": "read",
+      "topic": "site1/telemetry/opta-bridge-01/inv-0001/current_b"
+    },
+    {
+      "name": "current_phase_c",
+      "registerType": "input",
+      "address": 110,
+      "registerCount": 2,
+      "direction": "read",
+      "topic": "site1/telemetry/opta-bridge-01/inv-0001/current_c"
+    },
+    {
+      "name": "active_power_total",
+      "registerType": "input",
+      "address": 112,
+      "registerCount": 2,
+      "direction": "read",
+      "topic": "site1/telemetry/opta-bridge-01/inv-0001/active_power_total"
+    },
+    {
+      "name": "reactive_power_total",
+      "registerType": "input",
+      "address": 114,
+      "registerCount": 2,
+      "direction": "read",
+      "topic": "site1/telemetry/opta-bridge-01/inv-0001/reactive_power_total"
+    },
+    {
+      "name": "status",
+      "registerType": "input",
+      "address": 116,
+      "registerCount": 1,
+      "direction": "read",
+      "topic": "site1/telemetry/opta-bridge-01/inv-0001/status"
+    },
+    {
+      "name": "alarm",
+      "registerType": "input",
+      "address": 117,
+      "registerCount": 1,
+      "direction": "read",
+      "topic": "site1/telemetry/opta-bridge-01/inv-0001/alarm"
+    },
+    {
+      "name": "fault",
+      "registerType": "input",
+      "address": 118,
+      "registerCount": 1,
+      "direction": "read",
+      "topic": "site1/telemetry/opta-bridge-01/inv-0001/fault"
+    }
+  ]
 }
