@@ -6,11 +6,14 @@ details that don't fit the current structure.
 
 ## 1. Configuration schema
 
-- [ ] Finalize `network.json` schema (ethernet static IP/subnet/gateway, wifi ssid/password)
-- [ ] Finalize `mapping.json` schema: modbus target IP/port, mqtt broker IP/port, and the
-      register list (name, register type, address, register count, direction, topic)
-- [ ] Document the finalized schema (e.g. in `docs/`)
-- [ ] Update `config/*.example.json` to match
+- [x] Finalize `network.json` schema (ethernet mac/static IP/subnet/gateway, wifi static
+      IP/subnet/gateway plus ssid/password) — `docs/network-config-schema.md`
+- [x] Finalize `mapping.json` schema: modbus target IP/port, mqtt broker IP/port, and the
+      register list (name, register type, address, register count, direction, topic) —
+      `docs/mapping-config-schema.md`
+- [x] Document the finalized schema — `docs/network-config-schema.md`,
+      `docs/mapping-config-schema.md`
+- [x] Update `config/*.example.json` to match
 
 ## 2. Provisioning tool (`provisioning/OptaProvisioning`)
 
