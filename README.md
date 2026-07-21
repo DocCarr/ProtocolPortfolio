@@ -6,6 +6,9 @@ Implements a Modbus to MQTT protocol translation program on the Arduino Opta.
 - `draft/` — working files edited in place; copied into Arduino IDE manually once accepted.
 - `src/` — main bridge sketch source.
 - `provisioning/` — separate sketch that provisions network/mapping config onto the device.
+- `libraries/` — shared Arduino libraries (storage, WiFi, Ethernet, Modbus, MQTT mechanics)
+  used by both sketches. Copy each folder into your Arduino sketchbook's `libraries/`
+  directory before compiling either sketch.
 - `config/` — configuration JSON. `.example.json` files are checked in; real `network.json` /
   `mapping.json` (with credentials) are gitignored.
 - `docs/` — design notes and open issues.

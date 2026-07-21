@@ -1,13 +1,11 @@
 // OptaProvisioning.ino
 // Top-down skeleton: setup()/loop() call stubs, filled in bottom-up.
-// Library/API names below are placeholders for the concrete provisioning APIs and may
-// need to change once bottom-up implementation confirms what's actually available.
+// Generic filesystem and WiFi mechanics live in libraries/ (see each library's header).
+// WebServer routing and file-handling policy stay here, since only this sketch uses them.
 
-#include <WiFi.h>
+#include <OptaConfigStorage.h>
+#include <OptaWifiSupport.h>
 #include <WebServer.h>
-#include <LittleFS.h>
-#include <QSPIFBlockDevice.h>
-#include <MBRBlockDevice.h>
 
 // ---- Configuration ----
 
@@ -35,7 +33,6 @@ void setupFilePartition();
 void setupWifiAccessPoint();
 void setupWebServer();
 
-void handleWifiReconnect();
 void handleWebServerRequests();
 
 void handleGetNetworkConfig();
@@ -46,7 +43,7 @@ void handleGetMappingConfig();
 void handleDeleteMappingConfig();
 void handlePushMappingConfig();
 
-bool validateJson(const String& json);
+bool validateJson(const String& json, const char* requiredFieldPaths[], size_t count);
 
 // ---- setup/loop ----
 
@@ -59,21 +56,21 @@ void setup() {
 }
 
 void loop() {
-  handleWifiReconnect();
+  maintainAccessPoint();
   handleWebServerRequests();
 }
 
 // ---- Stub bodies (to be implemented bottom-up) ----
 
 void setupFilePartition() {
-  // Mount the LittleFS user partition (MBRBlockDevice at USER_PARTITION_INDEX, over
-  // QSPIFBlockDevice). On mount failure, do NOT auto-format - wait for an explicit
-  // confirmation (e.g. a serial command) before formatting, so a transient mount
+  // Mount USER_PARTITION_INDEX via OptaConfigStorage::mountPartition(). On a NotFormatted or
+  // Error result, wait for an explicit confirmation (e.g. a serial command) before calling
+  // OptaConfigStorage::formatAndMountPartition() - never auto-format, so a transient mount
   // failure can't silently wipe already-provisioned config.
 }
 
 void setupWifiAccessPoint() {
-  // Bring up the access point using AP_SSID/AP_PASSWORD and AP_IP/AP_SUBNET.
+  // OptaWifiSupport::beginAccessPoint() using AP_SSID/AP_PASSWORD/AP_IP/AP_SUBNET.
 }
 
 void setupWebServer() {
@@ -89,45 +86,42 @@ void setupWebServer() {
   // network.json and mapping.json are handled independently of each other.
 }
 
-void handleWifiReconnect() {
-  // Detect a dropped access point and restart it.
-}
-
 void handleWebServerRequests() {
   // Dispatch pending client requests to the registered routes.
 }
 
 void handleGetNetworkConfig() {
-  // Read network.json from the user partition and return it.
+  // OptaConfigStorage::readFile("network.json", ...) and return it.
 }
 
 void handleDeleteNetworkConfig() {
-  // Delete network.json from the user partition.
+  // OptaConfigStorage::deleteFile("network.json").
 }
 
 void handlePushNetworkConfig() {
-  // Test-harness flow: write the raw request body directly to network.json, then read it
-  // back, run validateJson() against the loaded content, and log a pass/fail message to
-  // Serial. A production provisioning path should validate before writing instead - see
-  // the note in TODO.md.
+  // Test-harness flow: OptaConfigStorage::writeFile("network.json", body) directly, then
+  // read it back and call validateJson() with network.json's required field paths, logging
+  // a pass/fail message to Serial. A production provisioning path should validate before
+  // writing instead - see the note in TODO.md.
 }
 
 void handleGetMappingConfig() {
-  // Read mapping.json from the user partition and return it.
+  // OptaConfigStorage::readFile("mapping.json", ...) and return it.
 }
 
 void handleDeleteMappingConfig() {
-  // Delete mapping.json from the user partition.
+  // OptaConfigStorage::deleteFile("mapping.json").
 }
 
 void handlePushMappingConfig() {
-  // Test-harness flow: write the raw request body directly to mapping.json, then read it
-  // back, run validateJson() against the loaded content, and log a pass/fail message to
-  // Serial. A production provisioning path should validate before writing instead - see
-  // the note in TODO.md.
+  // Test-harness flow: OptaConfigStorage::writeFile("mapping.json", body) directly, then
+  // read it back and call validateJson() with mapping.json's required field paths, logging
+  // a pass/fail message to Serial. A production provisioning path should validate before
+  // writing instead - see the note in TODO.md.
 }
 
-bool validateJson(const String& json) {
-  // Confirm well-formed JSON and required fields are present.
+bool validateJson(const String& json, const char* requiredFieldPaths[], size_t count) {
+  // Thin wrapper over OptaConfigStorage::isWellFormedJson()/hasRequiredFields() - this
+  // sketch supplies the required-field-path list for whichever file is being checked.
   return false;
 }
