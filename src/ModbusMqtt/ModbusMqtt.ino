@@ -21,6 +21,11 @@ const uint32_t USER_PARTITION_INDEX = 4;
 // (triggering reprovisioning) if mapping.json declares more than this many.
 const size_t MAX_REGISTERS = 32;
 
+// Fixed cap on a single register entry's width (registerCount), generously beyond any
+// realistic value width (even a 64-bit value would be 4). Bounds the stack buffer used to
+// read/publish a register's raw values - validateConfig() rejects anything wider than this.
+const int MAX_REGISTER_WIDTH = 8;
+
 // Required field paths per docs/network-config-schema.md and docs/mapping-config-schema.md.
 // Deliberately duplicated from provisioning/OptaProvisioning/OptaProvisioning.ino's copies -
 // each sketch is compiled independently and this is sketch-level application data, not
@@ -152,7 +157,7 @@ void loop() {
   pollIncomingMessages();
 }
 
-// ---- Stub bodies (to be implemented bottom-up) ----
+// ---- Bodies ----
 
 bool parseMacAddress(const char* macStr, uint8_t mac[6]) {
   if (macStr == nullptr) {
@@ -263,14 +268,27 @@ bool validateConfig() {
   // Required-field presence is already checked in loadConfig() (before field extraction, to
   // avoid null dereferences there) - this function only enforces the semantic rule below.
 
-  // Semantic rule from docs/mapping-config-schema.md: write-direction registers must be
-  // holding registers (input registers are read-only on the Modbus device).
   for (size_t i = 0; i < mappingConfig.registerCount; i++) {
     const RegisterMapping& reg = mappingConfig.registers[i];
+
+    // Semantic rule from docs/mapping-config-schema.md: write-direction registers must be
+    // holding registers (input registers are read-only on the Modbus device).
     if (reg.isWrite && reg.registerType != ModbusRegisterType::Holding) {
       Serial.print("validateConfig: register '");
       Serial.print(reg.name);
       Serial.println("' has direction=write but registerType is not holding.");
+      return false;
+    }
+
+    // Bounds the fixed-size stack buffer pollAndPublishReadRegisters()/onMqttMessage() read
+    // and write raw register values into.
+    if (reg.registerCount > MAX_REGISTER_WIDTH || reg.registerCount < 1) {
+      Serial.print("validateConfig: register '");
+      Serial.print(reg.name);
+      Serial.print("' has registerCount ");
+      Serial.print(reg.registerCount);
+      Serial.print(", must be between 1 and ");
+      Serial.println(MAX_REGISTER_WIDTH);
       return false;
     }
   }
@@ -357,9 +375,39 @@ void onMqttMessage(const char* topic, const uint8_t* payload, int payloadLength)
 }
 
 void pollAndPublishReadRegisters() {
-  // On mappingConfig.pollIntervalMs, for each entry with isWrite == false call
-  // OptaModbusSupport::readRegisters() and OptaMqttSupport::publish() with its raw
-  // wire-order values.
+  static unsigned long lastPollMs = 0;
+  unsigned long now = millis();
+  if (now - lastPollMs < mappingConfig.pollIntervalMs) {
+    return;
+  }
+  lastPollMs = now;
+
+  for (size_t i = 0; i < mappingConfig.registerCount; i++) {
+    RegisterMapping& reg = mappingConfig.registers[i];
+    if (reg.isWrite) {
+      continue;
+    }
+
+    uint16_t values[MAX_REGISTER_WIDTH];
+    if (!readRegisters(reg.registerType, reg.address, reg.registerCount, values)) {
+      Serial.print("pollAndPublishReadRegisters: readRegisters() failed for ");
+      Serial.println(reg.name);
+      continue;
+    }
+
+    // No buffering if MQTT isn't connected - this cycle's value is simply dropped, consistent
+    // with the no-intermediate-processing design (see docs/mapping-config-schema.md).
+    if (!isMqttConnected()) {
+      continue;
+    }
+
+    const uint8_t* payloadBytes = reinterpret_cast<const uint8_t*>(values);
+    int payloadLength = reg.registerCount * 2;  // 2 bytes per 16-bit register, wire order
+    if (!publish(reg.topic.c_str(), payloadBytes, payloadLength)) {
+      Serial.print("pollAndPublishReadRegisters: publish() failed for ");
+      Serial.println(reg.name);
+    }
+  }
 }
 
 bool validateWritePayloadLength(const RegisterMapping& target, int payloadLength) {
