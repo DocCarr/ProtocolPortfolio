@@ -31,13 +31,19 @@ sections 4 and 5.
 - [x] `OptaWifiSupport` — bottom-up implementation: `WiFi.config()`/`beginAP()`/`begin()`/
       `status()`, verified against the installed Opta core's actual WiFi headers
 - [x] `OptaEthernetSupport` — header/stub skeleton: static-IP setup and reconnection
-- [ ] `OptaEthernetSupport` — bottom-up implementation
+- [x] `OptaEthernetSupport` — bottom-up implementation: `Ethernet.begin(mac, ip, dns, gateway,
+      subnet)`, link state via `linkStatus()`, verified against the installed core
 - [x] `OptaModbusSupport` — header/stub skeleton: connect/reconnect, generic register
       read/write by address/type/count
-- [ ] `OptaModbusSupport` — bottom-up implementation
+- [x] `OptaModbusSupport` — bottom-up implementation: `ModbusTCPClient` over an owned
+      `EthernetClient`, `requestFrom()`/`read()` and `beginTransmission()`/`write()`/
+      `endTransmission()`, verified against the installed `ArduinoModbus` library
 - [x] `OptaMqttSupport` — header/stub skeleton: connect/reconnect, topic-list subscribe with
       auto-resubscribe on reconnect, publish, generic message dispatch
-- [ ] `OptaMqttSupport` — bottom-up implementation
+- [x] `OptaMqttSupport` — bottom-up implementation: `MqttClient` over an owned `WiFiClient`,
+      bridging its `onMessage(size)`/`messageTopic()`/`read()` callback into this library's
+      `(topic, payload, length)` handler interface, verified against the installed
+      `ArduinoMqttClient` library
 
 ## 3. Provisioning tool (`provisioning/OptaProvisioning`)
 
