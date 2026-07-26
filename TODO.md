@@ -51,7 +51,9 @@ sections 4 and 5.
       board; confirmed absent from the installed core and every other installed library)
 - [x] Push writes the incoming file directly, then reads it back and validates it (well-formed
       JSON, required fields present), logging pass/fail to Serial
-- [ ] Manual test: provision a device end-to-end, confirm files land correctly on flash
+- [x] Manual test: provision a device end-to-end, confirm files land correctly on flash —
+      `tests/procedures/001-provisioning.md`, passed, see
+      `tests/results/2026-07-25-provisioning/`
 
 **Note on validation order**: the write-then-validate flow above is a deliberate test-harness
 simplification (matches curl-based file transfer, not a real upload UI) - good enough to
