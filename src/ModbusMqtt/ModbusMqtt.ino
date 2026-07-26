@@ -315,13 +315,45 @@ void setupMqttClient() {
 }
 
 void setupRegisterTopics() {
-  // Build a topic array from every mappingConfig.registers entry with isWrite == true and
-  // call OptaMqttSupport::subscribeTopics(topics, count, onMqttMessage).
+  const char* topics[MAX_REGISTERS];
+  size_t writeTopicCount = 0;
+
+  for (size_t i = 0; i < mappingConfig.registerCount; i++) {
+    if (mappingConfig.registers[i].isWrite) {
+      topics[writeTopicCount++] = mappingConfig.registers[i].topic.c_str();
+    }
+  }
+
+  if (!subscribeTopics(topics, writeTopicCount, onMqttMessage)) {
+    Serial.println("setupRegisterTopics: one or more subscriptions failed.");
+  }
 }
 
 void onMqttMessage(const char* topic, const uint8_t* payload, int payloadLength) {
-  // Find the register mapped to `topic`, call validateWritePayloadLength(), and on success
-  // call OptaModbusSupport::writeHoldingRegisters() with the payload.
+  for (size_t i = 0; i < mappingConfig.registerCount; i++) {
+    RegisterMapping& target = mappingConfig.registers[i];
+    if (!target.isWrite || target.topic != topic) {
+      continue;
+    }
+
+    if (!validateWritePayloadLength(target, payloadLength)) {
+      Serial.print("onMqttMessage: payload length mismatch for topic ");
+      Serial.println(topic);
+      return;
+    }
+
+    // Raw wire-order register values, reinterpreted without reordering/decoding - see
+    // "Value representation" in docs/mapping-config-schema.md.
+    const uint16_t* values = reinterpret_cast<const uint16_t*>(payload);
+    if (!writeHoldingRegisters(target.address, target.registerCount, values)) {
+      Serial.print("onMqttMessage: writeHoldingRegisters() failed for topic ");
+      Serial.println(topic);
+    }
+    return;
+  }
+
+  Serial.print("onMqttMessage: no write-direction register mapped to topic ");
+  Serial.println(topic);
 }
 
 void pollAndPublishReadRegisters() {
@@ -331,5 +363,6 @@ void pollAndPublishReadRegisters() {
 }
 
 bool validateWritePayloadLength(const RegisterMapping& target, int payloadLength) {
-  return false;
+  // 2 bytes per 16-bit register, wire order - see docs/mapping-config-schema.md.
+  return payloadLength == target.registerCount * 2;
 }
