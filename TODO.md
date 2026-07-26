@@ -78,17 +78,18 @@ exercise the main sketch's config-loading logic. A production provisioning path 
 
 ## 5. Bottom-up implementation
 
-- [ ] Sketch-level `loadConfig()`/`validateConfig()`: parse `network.json`/`mapping.json` into
+- [x] Sketch-level `loadConfig()`/`validateConfig()`: parse `network.json`/`mapping.json` into
       the sketch's config structs using the libraries' file/JSON checks, and enforce the
-      semantic rule that direction "write" is only valid when registerType is "holding"
-- [ ] Wire `setupEthernet()`/`setupWifi()`/`setupModbusClient()`/`setupMqttClient()` to the
+      semantic rule that direction "write" is only valid when registerType is "holding" —
+      also bounds-checks each register's `registerCount` against `MAX_REGISTER_WIDTH`
+- [x] Wire `setupEthernet()`/`setupWifi()`/`setupModbusClient()`/`setupMqttClient()` to the
       corresponding library `begin*()` calls using the parsed config
-- [ ] `setupRegisterTopics()`/`onMqttMessage()`: build the write-direction topic list, dispatch
+- [x] `setupRegisterTopics()`/`onMqttMessage()`: build the write-direction topic list, dispatch
       incoming messages back to their mapped register
-- [ ] Bridging triggers:
-  - [ ] `pollAndPublishReadRegisters()`: poll read-direction registers on an interval via
+- [x] Bridging triggers:
+  - [x] `pollAndPublishReadRegisters()`: poll read-direction registers on an interval via
         `OptaModbusSupport`, publish raw register values via `OptaMqttSupport`
-  - [ ] `validateWritePayloadLength()`: structurally validate an incoming write payload
+  - [x] `validateWritePayloadLength()`: structurally validate an incoming write payload
         against the register's declared width before writing to Modbus
 
 ## 6. Testing — inverter use case
