@@ -49,6 +49,7 @@ MBRBlockDevice* partitionFor(uint32_t partitionIndex) {
 MountResult mountPartition(uint32_t partitionIndex) {
   MBRBlockDevice* partition = partitionFor(partitionIndex);
   if (partition == nullptr) {
+    Serial.println("OptaConfigStorage: block device init failed (root->init() != BD_ERROR_OK).");
     return MountResult::Error;
   }
 
@@ -62,17 +63,24 @@ MountResult mountPartition(uint32_t partitionIndex) {
   // Matches Arduino's own QSPIFormat.ino example, which also doesn't distinguish specific
   // mount failure codes - any non-zero mount() result is treated as "no valid filesystem
   // present yet on this partition."
+  Serial.print("OptaConfigStorage: mount() failed, error code ");
+  Serial.println(err);
   return MountResult::NotFormatted;
 }
 
 bool formatAndMountPartition(uint32_t partitionIndex) {
   MBRBlockDevice* partition = partitionFor(partitionIndex);
   if (partition == nullptr) {
+    Serial.println("OptaConfigStorage: block device init failed (root->init() != BD_ERROR_OK).");
     return false;
   }
 
   int err = userFilesystem.reformat(partition);
   mounted = (err == 0);
+  if (!mounted) {
+    Serial.print("OptaConfigStorage: reformat() failed, error code ");
+    Serial.println(err);
+  }
   return mounted;
 }
 

@@ -37,6 +37,10 @@ bool beginAccessPoint(const char* ssid, const char* password, IPAddress ip, IPAd
 
   WiFi.config(ip, IPAddress(), IPAddress(), subnet);
   int status = WiFi.beginAP(ssid, password);
+  if (status != WL_AP_LISTENING && status != WL_AP_CONNECTED) {
+    Serial.print("OptaWifiSupport: beginAP() returned status ");
+    Serial.println(status);
+  }
   return status == WL_AP_LISTENING || status == WL_AP_CONNECTED;
 }
 

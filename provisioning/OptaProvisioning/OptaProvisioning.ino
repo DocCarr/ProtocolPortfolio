@@ -78,6 +78,9 @@ bool waitYesNo();
 
 void setup() {
   Serial.begin(9600);
+  while (!Serial);  // block until Serial Monitor actually connects - this sketch is
+                    // interactive (needs y/n input), so there's no harm waiting here,
+                    // unlike the bridge sketch which must run unattended.
 
   setupFilePartition();
   setupWifiAccessPoint();
