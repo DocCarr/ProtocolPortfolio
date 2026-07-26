@@ -65,9 +65,51 @@ bool beginStation(const char* ssid, const char* password, IPAddress ip, IPAddres
   stationSubnet = subnet;
   stationGateway = gateway;
 
+  // TEMPORARY debugging aid - prints the credentials in plaintext. Remove before committing/
+  // deploying, since this isn't something we want to leave logging passwords long-term.
+  Serial.print("OptaWifiSupport: connecting with ssid='");
+  Serial.print(ssid);
+  Serial.print("' password='");
+  Serial.print(password);
+  Serial.println("'");
+
+  // TEMPORARY debugging aid - scans and reports channel/encryption for every visible network,
+  // to check whether the target SSID is on 5GHz (unsupported by this module) or using a
+  // security mode it can't negotiate. Remove once the connection issue is resolved.
+  // channel: 1-14 = 2.4GHz, 36+ = 5GHz. encryptionType: 2=WPA(TKIP), 4=WPA2(CCMP), 5=WEP,
+  // 6=WPA3(GCMP), 7=NONE(open), 8=AUTO, 9=UNKNOWN (wl_enc_type, wl_definitions.h).
+  int numNetworks = WiFi.scanNetworks();
+  Serial.print("OptaWifiSupport: scan found ");
+  Serial.print(numNetworks);
+  Serial.println(" networks:");
+  for (int i = 0; i < numNetworks; i++) {
+    Serial.print("  ssid='");
+    Serial.print(WiFi.SSID(i));
+    Serial.print("' channel=");
+    Serial.print(WiFi.channel(i));
+    Serial.print(" rssi=");
+    Serial.print(WiFi.RSSI(i));
+    Serial.print(" encryptionType=");
+    Serial.println(WiFi.encryptionType(i));
+  }
+
   WiFi.config(ip, IPAddress(), gateway, subnet);
-  int status = WiFi.begin(ssid, password);
-  return status == WL_CONNECTED;
+  WiFi.begin(ssid, password);
+
+  // begin() doesn't reflect the final outcome immediately - the actual handshake takes a
+  // moment, so status() must be polled with a short delay rather than checked once right
+  // after begin() returns.
+  const int MAX_ATTEMPTS = 10;
+  for (int attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    if (WiFi.status() == WL_CONNECTED) {
+      return true;
+    }
+    delay(500);
+  }
+
+  Serial.print("OptaWifiSupport: did not reach WL_CONNECTED after retries, status ");
+  Serial.println(WiFi.status());
+  return false;
 }
 
 bool isStationConnected() {

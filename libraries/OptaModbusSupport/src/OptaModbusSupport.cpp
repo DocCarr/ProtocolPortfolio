@@ -26,11 +26,19 @@ bool beginModbusClient(IPAddress targetIp, uint16_t targetPort) {
   savedTargetIp = targetIp;
   savedTargetPort = targetPort;
 
-  if (!modbusClient.begin(targetIp, targetPort)) {
-    Serial.println("OptaModbusSupport: ModbusTCPClient::begin() failed.");
-    return false;
+  // Matches OptaWifiSupport/OptaMqttSupport's retry pattern - the underlying network stack
+  // may need a moment to settle (particularly right after Ethernet just came up), so a single
+  // immediate connect attempt isn't reliable.
+  const int MAX_ATTEMPTS = 10;
+  for (int attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    if (modbusClient.begin(targetIp, targetPort)) {
+      return true;
+    }
+    delay(500);
   }
-  return true;
+
+  Serial.println("OptaModbusSupport: ModbusTCPClient::begin() failed after retries.");
+  return false;
 }
 
 bool isModbusConnected() {

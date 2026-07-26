@@ -28,12 +28,20 @@ bool beginEthernet(const uint8_t mac[6], IPAddress ip, IPAddress subnet, IPAddre
   // Ethernet.begin() takes a non-const uint8_t* even though it doesn't modify the buffer.
   Ethernet.begin(const_cast<uint8_t*>(mac), ip, IPAddress(), gateway, subnet);
 
-  EthernetLinkStatus linkStatus = Ethernet.linkStatus();
-  if (linkStatus != LinkON) {
-    Serial.print("OptaEthernetSupport: link status after begin() is ");
-    Serial.println(linkStatus == LinkOFF ? "LinkOFF" : "Unknown");
+  // Matches OptaWifiSupport's retry pattern - physical link auto-negotiation takes a moment,
+  // so linkStatus() needs polling rather than a single immediate check right after begin().
+  const int MAX_ATTEMPTS = 10;
+  for (int attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    if (Ethernet.linkStatus() == LinkON) {
+      return true;
+    }
+    delay(500);
   }
-  return linkStatus == LinkON;
+
+  EthernetLinkStatus linkStatus = Ethernet.linkStatus();
+  Serial.print("OptaEthernetSupport: link status after retries is ");
+  Serial.println(linkStatus == LinkOFF ? "LinkOFF" : "Unknown");
+  return false;
 }
 
 bool isEthernetConnected() {

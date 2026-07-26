@@ -68,14 +68,22 @@ bool beginMqttClient(IPAddress brokerIp, uint16_t brokerPort, const char* client
   savedClientId = clientId;
 
   mqttClient.setId(clientId);
-  if (!mqttClient.connect(brokerIp, brokerPort)) {
-    Serial.print("OptaMqttSupport: connect() failed, connectError() = ");
+
+  // Matches beginStation()'s retry pattern - the underlying network stack may need a moment
+  // to settle (particularly right after a fresh WiFi connection), so a single immediate
+  // connect() attempt isn't reliable.
+  const int MAX_ATTEMPTS = 10;
+  for (int attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+    if (mqttClient.connect(brokerIp, brokerPort)) {
+      mqttClient.onMessage(internalOnMessage);
+      return true;
+    }
+    Serial.print("OptaMqttSupport: connect() attempt failed, connectError() = ");
     Serial.println(mqttClient.connectError());
-    return false;
+    delay(500);
   }
 
-  mqttClient.onMessage(internalOnMessage);
-  return true;
+  return false;
 }
 
 bool isMqttConnected() {
