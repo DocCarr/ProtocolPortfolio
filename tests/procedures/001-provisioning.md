@@ -36,6 +36,10 @@ MQTT or Modbus.
 - [ ] Be ready to connect your laptop's WiFi to the Opta's access point (its SSID/password
       from the placeholders above) once the sketch is running - the curl commands below only
       reach the Opta while your laptop is joined to that network.
+- [ ] If running these commands from PowerShell: use `curl.exe`, not bare `curl` - PowerShell
+      aliases plain `curl` to `Invoke-WebRequest`, which doesn't understand curl's flags and
+      will fail with a confusing "Cannot find drive" error. Plain `curl` works fine from
+      Command Prompt (`cmd.exe`), where no such alias exists.
 
 ## Steps
 
@@ -45,16 +49,16 @@ MQTT or Modbus.
    - Confirm the Serial Monitor reports the access point starting.
 2. On your laptop, connect to the Opta's WiFi access point.
 3. Confirm connectivity, e.g. `ping 192.168.4.1` (or whatever `AP_IP` is set to).
-4. `curl -i http://192.168.4.1/network.json` — expect `404 Not Found` (nothing pushed yet).
-5. `curl -i --data-binary @config/network.json http://192.168.4.1/network.json` — expect
+4. `curl.exe -i http://192.168.4.1/network.json` — expect `404 Not Found` (nothing pushed yet).
+5. `curl.exe -i --data-binary @config/network.json http://192.168.4.1/network.json` — expect
    `200 OK`. Check the Serial Monitor for "network.json: received and validated OK."
-6. `curl -i http://192.168.4.1/network.json` — expect `200 OK` with the same JSON content
+6. `curl.exe -i http://192.168.4.1/network.json` — expect `200 OK` with the same JSON content
    echoed back, confirming the round trip.
 7. Repeat steps 4-6 for `mapping.json` (`config/mapping.json`).
-8. `curl -i -X DELETE http://192.168.4.1/network.json` — expect `200 OK`.
-9. `curl -i http://192.168.4.1/network.json` — expect `404 Not Found` again, confirming
+8. `curl.exe -i -X DELETE http://192.168.4.1/network.json` — expect `200 OK`.
+9. `curl.exe -i http://192.168.4.1/network.json` — expect `404 Not Found` again, confirming
    delete worked.
-10. `curl -i --data-binary @config/network.invalid.json http://192.168.4.1/network.json` —
+10. `curl.exe -i --data-binary @config/network.invalid.json http://192.168.4.1/network.json` —
     expect `422 Unprocessable Entity`. Check the Serial Monitor for "network.json: received
     but FAILED validation." Then re-push the real `config/network.json` to leave the device
     in a valid state.

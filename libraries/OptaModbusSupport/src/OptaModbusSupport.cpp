@@ -5,10 +5,12 @@
 // Confirmed against the installed ArduinoModbus library (Documents/Arduino/libraries/
 // ArduinoModbus): ModbusTCPClient(Client&) rides on any Client-derived transport -
 // EthernetClient here, since Modbus always runs over Ethernet in this project. begin(ip, port)
-// and connected() return 1/0. Multi-register reads use requestFrom(type, address, count) then
-// available()/read() per value (HOLDING_REGISTERS/INPUT_REGISTERS from ModbusClient.h); reads
-// return -1 per value on failure. Multi-register writes use beginTransmission(type, address,
-// count), write(value) per value, then endTransmission() - each returns 1/0.
+// and connected() return 1/0. Multi-register reads use requestFrom(id, type, address, count)
+// then available()/read() per value (HOLDING_REGISTERS/INPUT_REGISTERS from ModbusClient.h);
+// reads return -1 per value on failure. Multi-register writes use beginTransmission(id, type,
+// address, count), write(value) per value, then endTransmission() - each returns 1/0. The
+// explicit-id overloads are used (see MODBUS_UNIT_ID below) rather than the 0x00-default ones,
+// since the test emulator has a fixed unit ID of 1.
 
 namespace {
 
@@ -18,6 +20,12 @@ ModbusTCPClient modbusClient(ethernetTransport);
 bool haveSettings = false;
 IPAddress savedTargetIp;
 uint16_t savedTargetPort = 0;
+
+// The test Modbus emulator (ModSim) has a fixed, non-configurable unit/slave ID of 1 rather
+// than the ArduinoModbus default of 0 - hardcoded here since this project only ever talks to
+// one target device. If a future device needs a different ID, this should become a
+// parameter instead.
+const int MODBUS_UNIT_ID = 1;
 
 }  // namespace
 
@@ -60,7 +68,7 @@ bool maintainModbusConnection() {
 bool readRegisters(ModbusRegisterType type, int address, int count, uint16_t* out) {
   int modbusType = (type == ModbusRegisterType::Holding) ? HOLDING_REGISTERS : INPUT_REGISTERS;
 
-  int available = modbusClient.requestFrom(modbusType, address, count);
+  int available = modbusClient.requestFrom(MODBUS_UNIT_ID, modbusType, address, count);
   if (available != count) {
     Serial.print("OptaModbusSupport: requestFrom() returned ");
     Serial.println(available);
@@ -79,7 +87,7 @@ bool readRegisters(ModbusRegisterType type, int address, int count, uint16_t* ou
 }
 
 bool writeHoldingRegisters(int address, int count, const uint16_t* values) {
-  if (!modbusClient.beginTransmission(HOLDING_REGISTERS, address, count)) {
+  if (!modbusClient.beginTransmission(MODBUS_UNIT_ID, HOLDING_REGISTERS, address, count)) {
     Serial.println("OptaModbusSupport: beginTransmission() failed.");
     return false;
   }

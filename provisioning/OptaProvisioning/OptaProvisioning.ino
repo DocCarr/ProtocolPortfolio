@@ -155,6 +155,11 @@ void handleWebServerRequests() {
     return;
   }
 
+  // Default Stream timeout (often ~1s) can be too short for a larger body arriving over
+  // multiple network segments - readBytes() below would return early with a partial read,
+  // silently truncating the body. Longer timeout gives it room to actually finish.
+  client.setTimeout(5000);
+
   String requestLine = client.readStringUntil('\n');
   requestLine.trim();
 
@@ -193,6 +198,14 @@ void handleWebServerRequests() {
       }
       body.concat(buffer, bytesRead);
       remaining -= bytesRead;
+    }
+
+    if (remaining > 0) {
+      Serial.print("handleWebServerRequests: body read stopped early, missing ");
+      Serial.print(remaining);
+      Serial.print(" of ");
+      Serial.print(contentLength);
+      Serial.println(" bytes.");
     }
   }
 

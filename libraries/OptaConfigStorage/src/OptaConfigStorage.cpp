@@ -131,6 +131,10 @@ bool deleteFile(const char* path) {
 bool isWellFormedJson(const String& json) {
   JsonDocument doc;
   DeserializationError error = deserializeJson(doc, json);
+  if (error) {
+    Serial.print("OptaConfigStorage: isWellFormedJson() parse error: ");
+    Serial.println(error.c_str());
+  }
   return error == DeserializationError::Ok;
 }
 
@@ -172,12 +176,16 @@ bool hasRequiredFields(const String& json, const char* requiredFieldPaths[], siz
   JsonDocument doc;
   DeserializationError error = deserializeJson(doc, json);
   if (error) {
+    Serial.print("OptaConfigStorage: hasRequiredFields() called with invalid JSON: ");
+    Serial.println(error.c_str());
     return false;
   }
 
   JsonVariantConst docRoot = doc.as<JsonVariantConst>();
   for (size_t i = 0; i < count; i++) {
     if (!fieldPathExists(docRoot, String(requiredFieldPaths[i]))) {
+      Serial.print("OptaConfigStorage: required field missing: ");
+      Serial.println(requiredFieldPaths[i]);
       return false;
     }
   }

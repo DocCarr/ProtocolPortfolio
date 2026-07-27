@@ -134,9 +134,6 @@ bool validateWritePayloadLength(const RegisterMapping& target, int payloadLength
 
 void setup() {
   Serial.begin(9600);
-  while (!Serial);  // TEMPORARY debugging aid - remove before unattended field deployment.
-                    // Without this, early boot messages are lost if Serial Monitor wasn't
-                    // already connected the instant the board booted.
 
   MountResult mountResult = mountPartition(USER_PARTITION_INDEX);
   if (mountResult != MountResult::Mounted || !loadConfig() || !validateConfig()) {
