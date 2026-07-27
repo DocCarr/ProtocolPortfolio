@@ -94,8 +94,15 @@ exercise the main sketch's config-loading logic. A production provisioning path 
 
 ## 6. Testing — inverter use case
 
-- [ ] Write test procedures (from `tests/procedures/TEMPLATE.md`) covering: each telemetry
-      register group, start/stop command, real/reactive power dispatch, status/alarm/fault
-- [ ] Configure Mosquitto broker + Modbus emulator to match `mapping.json`'s register set
-- [ ] Run tests, capture screenshots, record results under `tests/results/`
-- [ ] Feed anything uncovered back into the schema/skeleton/implementation above
+- [x] Write test procedures (from `tests/procedures/TEMPLATE.md`) covering: each telemetry
+      register group, start/stop command, real/reactive power dispatch, status/alarm/fault —
+      `tests/procedures/002-bridge-inverter.md`, plus `tests/procedures/environment-setup.md`
+- [x] Configure Mosquitto broker + Modbus emulator to match `mapping.json`'s register set
+- [x] Run tests, capture screenshots, record results under `tests/results/` — see
+      `tests/results/2026-07-26-bridge-inverter/notes.md`. Telemetry (Sections A/B) and the
+      start/stop write + invalid-length rejection (Section C) passed; **power dispatch
+      (Section D) was not executed this run** and one MQTT publish failure during the
+      rejection test remains unexplained - both noted as open items in the results file.
+- [x] Feed anything uncovered back into the schema/skeleton/implementation above — Modbus
+      unit ID fix, connection retry-with-delay pattern (all four libraries), and the HTTP
+      body-truncation fix were all found during this testing and already committed
